@@ -74,11 +74,10 @@ function createArray() {
                 block: Boolean(Math.round(Math.random())),
                 color: BLOCKTYPES[Math.floor(Math.random() * BLOCKTYPES.length)]["color"],
                 parent: null,
-                belongsTo: 0,
+                fall: true
             });
         }
         map.push(row);
-        console.log("newRow");
     }
     return map;
 }
@@ -102,7 +101,7 @@ function render() {
 function gravity() {
     for (var y = grid.length-1; y >= 0; y--) {
         for (var x = 0; x < grid[y].length; x++) {
-            if (grid[y][x]["block"] && y + 1 < grid.length && !grid[y + 1][x]["block"]) {
+            if (grid[y][x]["block"] && grid[y][x]["fall"] && y + 1 < grid.length && !grid[y + 1][x]["block"]) {
                 temp = grid[y][x];
                 grid[y][x] = grid[y + 1][x];
                 grid[y + 1][x] = temp;
