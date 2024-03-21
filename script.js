@@ -1,9 +1,63 @@
 var c = document.getElementById("game");
 console.log(c);
 var ctx = c.getContext("2d");
-const size = 25;
-const blockTypes = ["yellow", "green", "orange", "blue", "lightgreen"];
-const gravityCD = 30;
+const SIZE = 25;
+const BLOCKTYPES = [
+    {
+        "color": "yellow",
+        "outlook": [
+            [1,1,0],
+            [0,1,1]
+        ],
+        "anchor": [0,1],
+        "rotatable": true
+    },
+    {
+        "color": "green",
+        "outlook": [
+            [0,1,1],
+            [1,1,0]
+        ],
+        "anchor":[0,1],
+        "rotatable": true
+    },
+    {
+        "color": "orange",
+        "outlook": [
+            [1,1,1],
+            [1,0,0]
+        ],
+        "anchor":[0,1],
+        "rotatable": true
+    },
+    {
+        "color": "pink",
+        "outlook": [
+            [1,1,1],
+            [0,0,1]
+        ],
+        "anchor":[0,1],
+        "rotatable": true
+    },
+    {
+        "color": "blue",
+        "outlook": [
+            [1,1],
+            [1,1]
+        ],
+        "anchor":[0,1],
+        "rotatable": false
+    },
+    {
+        "color": "lightgreen",
+        "outlook": [
+            [1,1,1,1]
+        ],
+        "anchor":[0,1],
+        "rotatable": true
+    }
+];
+const FALLSPEED = 300;
 var tick = 0;
 var grid = createArray();
 var temp;
@@ -18,7 +72,8 @@ function createArray() {
         for (let j = 0; j < columns; j++) {
             row.push({
                 block: Boolean(Math.round(Math.random())),
-                color: blockTypes[Math.floor(Math.random() * blockTypes.length)],
+                color: BLOCKTYPES[Math.floor(Math.random() * BLOCKTYPES.length)]["color"],
+                parent: null,
                 belongsTo: 0,
             });
         }
@@ -35,7 +90,7 @@ function render() {
         row.forEach((block) => {
             if (block["block"]) {
                 ctx.fillStyle = block["color"]; // set color
-                ctx.fillRect(x * size, y * size, size, size); // draw block
+                ctx.fillRect(x * SIZE, y * SIZE, SIZE, SIZE); // draw block
             }
             x++;
         });
@@ -54,13 +109,26 @@ function gravity() {
             }
         }
     }
+    setTimeout(() => {
+        window.requestAnimationFrame(gravity);
+    }, FALLSPEED);
+}
+
+function clearLine() {
+    var lineClear;
+    grid.forEach((line) => {
+        lineFilled = true;
+        line.forEach((block) => {
+            if (!block["block"]) {
+                lineFilled = false;
+            }
+        });
+    });
 }
 
 function frame() {
     // algorithm stuff
-    if (tick % gravityCD == 0) {
-        gravity();
-    }
+    clearLine();
 
     // render and continue
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
@@ -70,3 +138,4 @@ function frame() {
 }
 
 frame();
+gravity();
