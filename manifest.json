@@ -1,19 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "ADOG-blocker",
+    "name": "tetris",
     "version": "1.0",
-    "description": "a ad blocker created by mrdog233o5",
-    "content_scripts": [
-        {
-            "matches": [ "http://*/*", "https://*/*" ],
-            "js": [
-                "script.js"
-            ],
-            "run_at": "document_start"
-        }
-    ],
+    "description": "fun tetris game created by mrdog233o5",
     "action": {
         "default_popup": "popup.html",
-        "default_title": "ADOG-blocker"
+        "default_title": "tetris"
     }
 }

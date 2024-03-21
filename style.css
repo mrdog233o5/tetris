@@ -1,0 +1,19 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #121212;
+}
+
+#game {
+    border:1px solid #000000;
+}
+
+#creditsSpan {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    color: #FFFFFF;
+}
