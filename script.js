@@ -69,6 +69,7 @@ class Piece {
         this.outlook = BLOCKTYPES[type]["outlook"];
         this.anchor = BLOCKTYPES[type]["anchor"];
         this.rotatable = BLOCKTYPES[type]["rotatable"];
+        this.stuck = false;
         this.blocks = [];
         for (var y = 0; y < this.outlook.length; y++) {
             for (var x = 0; x < this.outlook[y].length; x++) {
@@ -77,7 +78,6 @@ class Piece {
                 }
             }
         }
-        console.log(this.blocks);
     }
 
     render() {
@@ -87,20 +87,45 @@ class Piece {
             grid[this.blocks[i][0]][this.blocks[i][1]]["block"] = true;
             grid[this.blocks[i][0]][this.blocks[i][1]]["fall"] = true;
         }
+        this.checkStuck();
     }
 
-    fall() {
+    checkStuck() {
+        var stuck = false;
+        this.blocks.forEach(block => {
+            var y = block[0], x = block[1];
+            if (
+                grid[y][x]["block"] &&
+                grid[y][x]["fall"] &&
+                (
+                    y + 1 >= grid.length ||
+                    (
+                        grid[y + 1][x]["block"] &&
+                        !(grid[y + 1][x]["parent"] == grid[y][x]["parent"])
+                    )
+                )
+            ) {
+                stuck = true;
+            }
+        });
+        this.stuck = stuck;
+    }
+
+    move(yMove, xMove) {
         var i = 0;
         var fall = true;
         this.blocks.forEach(block => {
             var y = block[0], x = block[1];
             if (
                 grid[y][x]["block"] && 
-                grid[y][x]["fall"] && 
-                y + 1 < grid.length &&
+                grid[y][x]["fall"] &&   
+                x + xMove >= 0 &&
+                x + xMove < grid[0].length &&
+                y + yMove >= 0 &&
+                y + yMove < grid.length &&
                 (
-                    !grid[y + 1][x]["block"] ||
-                    grid[y + 1][x]["parent"] == grid[y][x]["parent"]
+                    !grid[y + yMove][x + xMove]["block"] ||
+                    grid[y + yMove][x + xMove]["parent"] == grid[y][x]["parent"]
                 )
             ) {} else {
                 fall = false;
@@ -109,7 +134,6 @@ class Piece {
         if (fall) {
             this.blocks.forEach(block => {
                 var y = block[0], x = block[1];
-                console.log("test")
                 temp = grid[y][x];
                 grid[y][x] = {
                     block: false,
@@ -117,46 +141,25 @@ class Piece {
                     parent: null,
                     fall: true
                 };
-                grid[y + 1][x] = temp;
-                this.blocks[i][0] = this.blocks[i][0] + 1;
+                grid[y + yMove][x + xMove] = temp;
+                this.blocks[i][0] = this.blocks[i][0] + yMove;
+                this.blocks[i][1] = this.blocks[i][1] + xMove;
                 i++;
             });
         }
     }
 
-    left() {
-        var i = 0;
-        var fall = true;
-        this.blocks.forEach(block => {
-            var y = block[0], x = block[1];
-            if (
-                grid[y][x]["block"] && 
-                grid[y][x]["fall"] && 
-                y + 1 < grid.length &&
-                (
-                    !grid[y][x-1]["block"] ||
-                    grid[y][x-1]["parent"] == grid[y][x]["parent"]
-                )
-            ) {} else {
-                fall = false;
+    spin() {
+        var newblocks = [];
+        var row = [];
+        for (var i = 0; i < this.outlook[0].length; i++) {
+            for (var j = this.outlook.length - 1; j >= 0; j--) {
+                row.push(this.outlook[j][i]);
             }
-        });
-        if (fall) {
-            this.blocks.forEach(block => {
-                var y = block[0], x = block[1];
-                console.log("test")
-                temp = grid[y][x];
-                grid[y][x] = {
-                    block: false,
-                    color: null,
-                    parent: null,
-                    fall: true
-                };
-                grid[y][x-1] = temp;
-                this.blocks[i][0] = this.blocks[i][0] + 1;
-                i++;
-            });
+            newblocks.push(row);
+            row = [];
         }
+        return newblocks;
     }
 
 }
@@ -199,7 +202,7 @@ function render() {
 
 function gravity() {
     pieces.forEach(piece => {
-        piece.fall();
+        piece.move(1,0);
     });
     setTimeout(() => {
         window.requestAnimationFrame(gravity);
@@ -224,6 +227,9 @@ function frame() {
     pieces.forEach(piece => {
         piece.render();
     });
+    if (pieces[pieces.length-1].stuck) {
+        pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+    }
 
     // render and continue
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
@@ -232,7 +238,18 @@ function frame() {
     tick++;
 }
 
+pieces.push(new Piece(0));
 frame();
 gravity();
 
-pieces.push(new Piece(0))
+// block movement
+document.addEventListener("keydown", function(event) {
+    if (event.keyCode === 39 || event.key === "ArrowRight") {
+        pieces[pieces.length-1].move(0,1);
+    }
+});
+document.addEventListener("keydown", function(event) {
+    if (event.keyCode === 37 || event.key === "ArrowLeft") {
+        pieces[pieces.length-1].move(0,-1);
+    }
+});
