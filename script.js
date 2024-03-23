@@ -55,13 +55,25 @@ const BLOCKTYPES = [
         ],
         "anchor":[0,1],
         "rotatable": true
+    },
+    {
+        "color": "red",
+        "outlook": [
+            [0,1,0],
+            [1,1,1]
+        ],
+        "anchor":[0,1],
+        "rotatable": true
     }
 ];
 const FALLSPEED = 300;
+const KEYSPEED = 100;
 var tick = 0;
 var grid = createArray();
 var temp;
 var pieces = [];
+var keys = [false, false, false, false];
+var keysLoop = [false, false, false, false];
 
 class Piece {
     constructor(type) {
@@ -232,7 +244,6 @@ class Piece {
         // spin this piece
 
 
-        console.log(anchor);
         this.blocks.forEach((pos) => {
             grid[pos[0]][pos[1]] = {
                 block: false,
@@ -245,6 +256,42 @@ class Piece {
         this.anchor = anchor;
         this.blocks = coords;
         this.outlook = newblocks;
+    }
+
+    left() {
+        keysLoop[0] = true;
+        this.move(0,-1);
+
+        setTimeout(() => {
+            keysLoop[0] = false;
+        }, KEYSPEED);
+    }
+
+    up() {
+        keysLoop[1] = true;
+        this.spin();
+
+        setTimeout(() => {
+            keysLoop[1] = false;
+        }, KEYSPEED);
+    }
+
+    right() {
+        keysLoop[2] = true;
+        this.move(0,1);
+
+        setTimeout(() => {
+            keysLoop[2] = false;
+        }, KEYSPEED);
+    }
+
+    down() {
+        keysLoop[3] = true;
+        this.move(1,0);
+
+        setTimeout(() => {
+            keysLoop[3] = false;
+        }, KEYSPEED);
     }
 
 }
@@ -306,12 +353,31 @@ function clearLine() {
     });
 }
 
+function controls() {
+
+    if (keys[0] && !keysLoop[0]) {
+        pieces[pieces.length - 1].left();
+    }
+    if (keys[1] && !keysLoop[1]) {
+        pieces[pieces.length - 1].up();
+    }
+    if (keys[2] && !keysLoop[2]) {
+        pieces[pieces.length - 1].right();
+    }
+    if (keys[3] && !keysLoop[3]) {
+        pieces[pieces.length - 1].down();
+    }
+
+}
+
 function frame() {
     // algorithm stuff
     clearLine();
+    controls();
     pieces.forEach(piece => {
         piece.render();
     });
+
     if (pieces[pieces.length-1].stuck) {
         pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
     }
@@ -323,24 +389,23 @@ function frame() {
     tick++;
 }
 
-pieces.push(new Piece(0));
+pieces.push(new Piece(3));
 frame();
 gravity();
 
 // block movement
+// left up right down
 document.addEventListener("keydown", function(event) {
-    if (event.keyCode === 37 || event.key === "ArrowLeft") {
-        pieces[pieces.length-1].move(0,-1);
+    for (var i = 0; i < keys.length; i++) {;
+        if (event.keyCode === 37 + i) {
+            keys[i] = true;
+        }
     }
 });
-document.addEventListener("keydown", function(event) {
-    if (event.keyCode === 39 || event.key === "ArrowRight") {
-        pieces[pieces.length-1].move(0,1);
+document.addEventListener("keyup", function(event) {
+    for (var i = 0; i < keys.length; i++) {;
+        if (event.keyCode === 37 + i) {
+            keys[i] = false;
+        }
     }
 });
-document.addEventListener("keydown", function(event) {
-    if (event.keyCode === 38 || event.key === "ArrowUp") {
-        pieces[pieces.length-1].spin();
-    }
-});
-
