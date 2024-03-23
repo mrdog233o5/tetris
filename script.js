@@ -66,9 +66,9 @@ const BLOCKTYPES = [
         "rotatable": true
     }
 ];
-const FALLSPEED = 300;
+const FALLSPEED = 350;
 const KEYSPEED = 50;
-const STUCKCD = 500;
+const STUCKCD = 300;
 const AFTERSTUCKCD = 1000
 var tick = 0;
 var grid = createArray();
@@ -85,6 +85,8 @@ class Piece {
         this.rotatable = BLOCKTYPES[type]["rotatable"];
         this.stuck = false;
         this.blocks = [];
+        this.keyDuringStuck = false;
+        this.stuckDetected = false;
         this.anchorCoords = [this.anchor[0] , Math.floor(grid[0].length/2)-1];
         for (var y = 0; y < this.outlook.length; y++) {
             for (var x = 0; x < this.outlook[y].length; x++) {
@@ -102,7 +104,12 @@ class Piece {
             grid[this.blocks[i][0]][this.blocks[i][1]]["block"] = true;
             grid[this.blocks[i][0]][this.blocks[i][1]]["fall"] = true;
         }
-        this.checkStuck();
+        if (this.stuck) {
+            this.blocks.forEach((pos) => {
+                grid[pos[0]][pos[1]]["fall"] = false;
+            });
+            clearLine();
+        }
     }
 
     checkStuck() {
@@ -123,25 +130,51 @@ class Piece {
                 stuck = true;
             }
         });
-        setTimeout(() => {
-            if (keys[0] || keys[2]) {
-                setTimeout(() => {
+
+        if (stuck) {
+            this.stuckDetected = true;
+            setTimeout(() => {
+                if (this.keyDuringStuck) {
+                    setTimeout(() => {
+                        var nowStuck = false;
+                        this.blocks.forEach(block => {
+                            var y = block[0], x = block[1];
+                            if (
+                                grid[y][x]["block"] &&
+                                grid[y][x]["fall"] &&
+                                (
+                                    y + 1 >= grid.length ||
+                                    (
+                                        grid[y + 1][x]["block"] &&
+                                        !(grid[y + 1][x]["parent"] == grid[y][x]["parent"])
+                                    )
+                                )
+                            ) {
+                                nowStuck = true;
+                            }
+                        });
+                        if (nowStuck) {
+                            this.stuck = stuck;
+                        }
+                    }, AFTERSTUCKCD);
+                } else {
                     this.stuck = stuck;
-                }, AFTERSTUCKCD);
-            } else {
-                this.stuck = stuck;
-            }
-        }, STUCKCD);
+                }
+            }, STUCKCD);
+        }
     }
 
     move(yMove, xMove) {
+        if (this.stuck) {
+            return;
+        }
         var i = 0;
         var fall = true;
         this.blocks.forEach(block => {
             var y = block[0], x = block[1];
             if (
                 grid[y][x]["block"] && 
-                grid[y][x]["fall"] &&   
+                grid[y][x]["fall"] &&
                 x + xMove >= 0 &&
                 x + xMove < grid[0].length &&
                 y + yMove >= 0 &&
@@ -153,6 +186,8 @@ class Piece {
             ) {} else {
                 fall = false;
             }
+
+
         });
         if (fall) {
             this.anchorCoords[0] = this.anchorCoords[0] + yMove;
@@ -172,9 +207,13 @@ class Piece {
                 i++;
             });
         }
+        this.checkStuck();
     }
 
     spin() {
+        if (this.stuck) {
+            return;
+        }
         // exit if not rotatable
         if (this.stuck || !this.rotatable) {
             return;
@@ -269,6 +308,9 @@ class Piece {
     }
 
     left() {
+        if (this.stuckDetected) {
+            this.keyDuringStuck = true;
+        }
         keysLoop[0] = true;
         this.move(0,-1);
 
@@ -278,6 +320,9 @@ class Piece {
     }
 
     right() {
+        if (this.stuckDetected) {
+            this.keyDuringStuck = true;
+        }
         keysLoop[2] = true;
         this.move(0,1);
 
@@ -335,7 +380,9 @@ function render() {
 
 function gravity() {
     pieces.forEach(piece => {
-        piece.move(1,0);
+        if (!piece.stuck) {
+            piece.move(1,0);
+        }
     });
     setTimeout(() => {
         window.requestAnimationFrame(gravity);
@@ -343,15 +390,30 @@ function gravity() {
 }
 
 function clearLine() {
-    var lineClear;
-    grid.forEach((line) => {
+    var line;
+    for (var i = 0; i < grid.length; i++) {
+        line = grid[i];
         lineFilled = true;
         line.forEach((block) => {
             if (!block["block"]) {
                 lineFilled = false;
             }
         });
-    });
+
+        if (lineFilled) {
+            console.log("===");
+            for (var j = 0; j < line.length; j++) {
+                console.log([i, j]);
+                for (var a = 0; a < grid[i][j]["parent"].blocks.length; a++) {
+                    if (grid[i][j]["parent"].blocks[a][0] == i && grid[i][j]["parent"].blocks[a][1] == j) {
+                        grid[i][j]["parent"].blocks.splice(a, 1);
+                    }
+                }
+                grid[i][j]["block"] = false;
+                grid[i][j]["parent"] = null;
+            }
+        }
+    }
 }
 
 function controls() {
@@ -370,7 +432,6 @@ function controls() {
 
 function frame() {
     // algorithm stuff
-    clearLine();
     controls();
     pieces.forEach(piece => {
         piece.render();
@@ -410,3 +471,4 @@ document.addEventListener("keyup", function(event) {
         }
     }
 });
+
