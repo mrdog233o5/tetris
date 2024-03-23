@@ -71,10 +71,11 @@ class Piece {
         this.rotatable = BLOCKTYPES[type]["rotatable"];
         this.stuck = false;
         this.blocks = [];
+        this.anchorCoords = [this.anchor[0] , Math.floor(grid[0].length/2)-1];
         for (var y = 0; y < this.outlook.length; y++) {
             for (var x = 0; x < this.outlook[y].length; x++) {
                 if (this.outlook[y][x]) {
-                    this.blocks.push([y,x + Math.floor(grid[0].length/2) - this.anchor[1] - 1 ]);
+                    this.blocks.push([y + this.anchorCoords[0] - this.anchor[0] , x + this.anchorCoords[1] - this.anchor[1] ]);
                 }
             }
         }
@@ -82,7 +83,7 @@ class Piece {
 
     render() {
         for (var i = 0; i < this.blocks.length; i++) {
-            grid[this.blocks[i][0]][this.blocks[i][1]]["color"]= this.color;
+            grid[this.blocks[i][0]][this.blocks[i][1]]["color"] = this.color;
             grid[this.blocks[i][0]][this.blocks[i][1]]["parent"] = this;
             grid[this.blocks[i][0]][this.blocks[i][1]]["block"] = true;
             grid[this.blocks[i][0]][this.blocks[i][1]]["fall"] = true;
@@ -132,6 +133,8 @@ class Piece {
             }
         });
         if (fall) {
+            this.anchorCoords[0] = this.anchorCoords[0] + yMove;
+            this.anchorCoords[1] = this.anchorCoords[1] + xMove;
             this.blocks.forEach(block => {
                 var y = block[0], x = block[1];
                 temp = grid[y][x];
@@ -150,8 +153,51 @@ class Piece {
     }
 
     spin() {
+        // exit if not rotatable
+        if (this.stuck || !this.rotatable) {
+            return;
+        }
+        var anchorArr = [];
+        var newAnchorArr = [];
         var newblocks = [];
         var row = [];
+        var anchor;
+        var anchorCoords;
+        var coords = [];
+
+        // create array
+        for (var i = 0; i < this.outlook.length; i++) {
+            for (var j = 0; j < this.outlook[0].length; j++) {
+                if (i == this.anchor[0] && j == this.anchor[1]) {
+                    row.push(true);
+                    continue;
+                }
+                row.push(false);
+            }
+            anchorArr.push(row);
+            row = [];
+        }
+
+        // flip the anchor array
+        for (var i = 0; i < anchorArr[0].length; i++) {
+            for (var j = anchorArr.length - 1; j >= 0; j--) {
+                row.push(anchorArr[j][i]);
+            }
+            newAnchorArr.push(row);
+            row = [];
+        }
+
+        // update the anchor position
+        for (var i = 0; i < newAnchorArr.length; i++) {
+            for (var j = 0; j < newAnchorArr[0].length; j++) {
+                if (newAnchorArr[i][j]) {
+                    anchor = [i,j];
+                }
+            }
+        }
+
+
+        // flip the piece
         for (var i = 0; i < this.outlook[0].length; i++) {
             for (var j = this.outlook.length - 1; j >= 0; j--) {
                 row.push(this.outlook[j][i]);
@@ -159,7 +205,46 @@ class Piece {
             newblocks.push(row);
             row = [];
         }
-        return newblocks;
+
+        // calculate new position
+
+        anchorCoords = this.anchorCoords;
+        
+        for (var i = 0; i < newblocks.length; i++) {
+            for (var j = 0; j < newblocks[0].length; j++) {
+                if (newblocks[i][j]) {
+                    coords.push([anchorCoords[0] + this.anchor[0] - 1 + i, anchorCoords[1] + this.anchor[1] + j]);
+                }
+            }
+        }
+
+        // check if new pos is valid, quit if not
+        for (var i = 0; i < coords.length; i++) {
+            var pos = coords[i];
+            if (pos[0] >= grid.length || pos[0] < 0 || pos[1] >= grid[0].length || pos[1] < 0) {
+                return;
+            }
+            if (grid[pos[0]][pos[1]]["block"] && grid[pos[0]][pos[1]]["parent"] != this) {
+                return;
+            }
+        };
+
+        // spin this piece
+
+
+        console.log(anchor);
+        this.blocks.forEach((pos) => {
+            grid[pos[0]][pos[1]] = {
+                block: false,
+                color: null,
+                parent: null,
+                fall: true
+            };
+        });
+
+        this.anchor = anchor;
+        this.blocks = coords;
+        this.outlook = newblocks;
     }
 
 }
@@ -210,7 +295,6 @@ function gravity() {
 }
 
 function clearLine() {
-    var lineClear;
     grid.forEach((line) => {
         lineFilled = true;
         line.forEach((block) => {
@@ -238,18 +322,24 @@ function frame() {
     tick++;
 }
 
-pieces.push(new Piece(0));
+pieces.push(new Piece(5));
 frame();
 gravity();
 
 // block movement
+document.addEventListener("keydown", function(event) {
+    if (event.keyCode === 37 || event.key === "ArrowLeft") {
+        pieces[pieces.length-1].move(0,-1);
+    }
+});
 document.addEventListener("keydown", function(event) {
     if (event.keyCode === 39 || event.key === "ArrowRight") {
         pieces[pieces.length-1].move(0,1);
     }
 });
 document.addEventListener("keydown", function(event) {
-    if (event.keyCode === 37 || event.key === "ArrowLeft") {
-        pieces[pieces.length-1].move(0,-1);
+    if (event.keyCode === 38 || event.key === "ArrowUp") {
+        pieces[pieces.length-1].spin();
     }
 });
+

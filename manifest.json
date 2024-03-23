@@ -1,10 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "tetris",
+    "name": "stacker",
     "version": "1.0",
-    "description": "fun tetris game created by mrdog233o5",
+    "description": "fun stacker game created by mrdog233o5",
     "action": {
         "default_popup": "popup.html",
-        "default_title": "tetris"
+        "default_title": "stacker"
     }
 }
