@@ -295,6 +295,7 @@ function gravity() {
 }
 
 function clearLine() {
+    var lineClear;
     grid.forEach((line) => {
         lineFilled = true;
         line.forEach((block) => {
@@ -322,7 +323,7 @@ function frame() {
     tick++;
 }
 
-pieces.push(new Piece(5));
+pieces.push(new Piece(0));
 frame();
 gravity();
 
