@@ -67,7 +67,9 @@ const BLOCKTYPES = [
     }
 ];
 const FALLSPEED = 300;
-const KEYSPEED = 100;
+const KEYSPEED = 50;
+const STUCKCD = 500;
+const AFTERSTUCKCD = 1000
 var tick = 0;
 var grid = createArray();
 var temp;
@@ -121,7 +123,15 @@ class Piece {
                 stuck = true;
             }
         });
-        this.stuck = stuck;
+        setTimeout(() => {
+            if (keys[0] || keys[2]) {
+                setTimeout(() => {
+                    this.stuck = stuck;
+                }, AFTERSTUCKCD);
+            } else {
+                this.stuck = stuck;
+            }
+        }, STUCKCD);
     }
 
     move(yMove, xMove) {
@@ -267,15 +277,6 @@ class Piece {
         }, KEYSPEED);
     }
 
-    up() {
-        keysLoop[1] = true;
-        this.spin();
-
-        setTimeout(() => {
-            keysLoop[1] = false;
-        }, KEYSPEED);
-    }
-
     right() {
         keysLoop[2] = true;
         this.move(0,1);
@@ -358,9 +359,6 @@ function controls() {
     if (keys[0] && !keysLoop[0]) {
         pieces[pieces.length - 1].left();
     }
-    if (keys[1] && !keysLoop[1]) {
-        pieces[pieces.length - 1].up();
-    }
     if (keys[2] && !keysLoop[2]) {
         pieces[pieces.length - 1].right();
     }
@@ -400,6 +398,9 @@ document.addEventListener("keydown", function(event) {
         if (event.keyCode === 37 + i) {
             keys[i] = true;
         }
+    }
+    if (event.keyCode === 38) {
+        pieces[pieces.length - 1].spin();
     }
 });
 document.addEventListener("keyup", function(event) {
