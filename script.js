@@ -1,5 +1,4 @@
 var c = document.getElementById("game");
-console.log(c);
 var ctx = c.getContext("2d");
 const SIZE = 25;
 const BLOCKTYPES = [
@@ -108,7 +107,6 @@ class Piece {
             this.blocks.forEach((pos) => {
                 grid[pos[0]][pos[1]]["fall"] = false;
             });
-            clearLine();
         }
     }
 
@@ -155,10 +153,12 @@ class Piece {
                         });
                         if (nowStuck) {
                             this.stuck = stuck;
+                            clearLine();
                         }
                     }, AFTERSTUCKCD);
                 } else {
                     this.stuck = stuck;
+                    clearLine();
                 }
             }, STUCKCD);
         }
@@ -391,6 +391,8 @@ function gravity() {
 
 function clearLine() {
     var line;
+    var lineCleared;
+    var lineFilled;
     for (var i = 0; i < grid.length; i++) {
         line = grid[i];
         lineFilled = true;
@@ -401,17 +403,47 @@ function clearLine() {
         });
 
         if (lineFilled) {
-            console.log("===");
+            lineCleared = i;
+
+            // clear the line
             for (var j = 0; j < line.length; j++) {
-                console.log([i, j]);
-                for (var a = 0; a < grid[i][j]["parent"].blocks.length; a++) {
-                    if (grid[i][j]["parent"].blocks[a][0] == i && grid[i][j]["parent"].blocks[a][1] == j) {
-                        grid[i][j]["parent"].blocks.splice(a, 1);
+                for (var k = 0; k < grid[i][j]["parent"].blocks.length; k++) {
+                    if (grid[i][j]["parent"].blocks[k][0] == i && grid[i][j]["parent"].blocks[k][1] == j) {
+                        grid[i][j]["parent"].blocks.splice(k, 1);
                     }
                 }
                 grid[i][j]["block"] = false;
                 grid[i][j]["parent"] = null;
             }
+
+            // move blocks down
+            for (var j = lineCleared; j > 0; j--) {
+                for (var k = 0; k < grid[0].length; k++) {
+                    if (
+                        (
+                            !grid[j][k]["block"] ||
+                            grid[j][k]["parent"].stuck
+                        ) && (
+                            !grid[j - 1][k]["block"] ||
+                            grid[j - 1][k]["parent"].stuck
+                        )
+                    ) {
+                        if (grid[j - 1][k]["block"]) {
+                            grid[j - 1][k]["parent"].blocks.push([j, k]);
+                            for (var l = 0; l < grid[j - 1][k]["parent"].blocks.length; l++) {
+                                if (grid[j - 1][k]["parent"].blocks[l][0] == j - 1 && grid[j - 1][k]["parent"].blocks[l][1] == k) {
+                                    grid[j - 1][k]["parent"].blocks.splice(l, 1);
+                                }
+                            }
+                            grid[j - 1][k]["block"] = false;
+                            grid[j - 1][k]["parent"] = null;
+                        }
+                    }
+                }
+            }
+            pieces.forEach(piece => {
+                piece.render();
+            });
         }
     }
 }
@@ -438,7 +470,7 @@ function frame() {
     });
 
     if (pieces[pieces.length-1].stuck) {
-        pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+        pieces.push(new Piece(4))//Math.floor(Math.random() * BLOCKTYPES.length)));
     }
 
     // render and continue
@@ -448,7 +480,7 @@ function frame() {
     tick++;
 }
 
-pieces.push(new Piece(3));
+pieces.push(new Piece(4))//;Math.floor(Math.random() * BLOCKTYPES.length)));
 frame();
 gravity();
 
@@ -471,4 +503,5 @@ document.addEventListener("keyup", function(event) {
         }
     }
 });
+
 
