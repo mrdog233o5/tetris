@@ -470,7 +470,7 @@ function frame() {
     });
 
     if (pieces[pieces.length-1].stuck) {
-        pieces.push(new Piece(4))//Math.floor(Math.random() * BLOCKTYPES.length)));
+        pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
     }
 
     // render and continue
@@ -480,7 +480,7 @@ function frame() {
     tick++;
 }
 
-pieces.push(new Piece(4))//;Math.floor(Math.random() * BLOCKTYPES.length)));
+pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
 frame();
 gravity();
 
