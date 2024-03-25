@@ -128,7 +128,8 @@ class Piece {
                 stuck = true;
             }
         });
-
+        
+        // delay after land
         if (stuck) {
             this.stuckDetected = true;
             setTimeout(() => {
@@ -340,6 +341,29 @@ class Piece {
         }, KEYSPEED);
     }
 
+    bottom() {
+        while (!this.stuck) {
+            this.move(1, 0);
+            this.blocks.forEach(block => {
+            var y = block[0], x = block[1];
+            if (
+                grid[y][x]["block"] &&
+                grid[y][x]["fall"] &&
+                (
+                    y + 1 >= grid.length ||
+                    (
+                        grid[y + 1][x]["block"] &&
+                        !(grid[y + 1][x]["parent"] == grid[y][x]["parent"])
+                    )
+                )
+                ) {
+                    this.stuck = true;
+                }
+            });
+            this.render();
+            render();
+        }
+    }
 }
 
 function createArray() {
@@ -494,6 +518,9 @@ document.addEventListener("keydown", function(event) {
     }
     if (event.keyCode === 38) {
         pieces[pieces.length - 1].spin();
+    }
+    if (event.keyCode === 32) {
+        pieces[pieces.length - 1].bottom();
     }
 });
 document.addEventListener("keyup", function(event) {
