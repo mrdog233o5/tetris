@@ -1,5 +1,6 @@
-var c = document.getElementById("game");
-var ctx = c.getContext("2d");
+const c = document.getElementById("game");
+const ctx = c.getContext("2d");
+const scoreH1 = document.getElementById("score");
 const SIZE = 25;
 const BLOCKTYPES = [
     {
@@ -66,7 +67,7 @@ const BLOCKTYPES = [
     }
 ];
 const FALLSPEED = 350;
-const KEYSPEED = 50;
+const KEYSPEED = 60;
 const STUCKCD = 300;
 const AFTERSTUCKCD = 1000
 var tick = 0;
@@ -75,6 +76,7 @@ var temp;
 var pieces = [];
 var keys = [false, false, false, false];
 var keysLoop = [false, false, false, false];
+var score = 0;
 
 class Piece {
     constructor(type) {
@@ -86,6 +88,7 @@ class Piece {
         this.blocks = [];
         this.keyDuringStuck = false;
         this.stuckDetected = false;
+        this.addedScore = false;
         this.anchorCoords = [this.anchor[0] , Math.floor(grid[0].length/2)-1];
         for (var y = 0; y < this.outlook.length; y++) {
             for (var x = 0; x < this.outlook[y].length; x++) {
@@ -155,11 +158,19 @@ class Piece {
                         if (nowStuck) {
                             this.stuck = stuck;
                             clearLine();
+                            if (!this.addedScore) {
+                                score += 10;
+                                this.addedScore = true;
+                            }
                         }
                     }, AFTERSTUCKCD);
                 } else {
                     this.stuck = stuck;
                     clearLine();
+                    if (!this.addedScore) {
+                        score += 10;
+                        this.addedScore = true;
+                    }
                 }
             }, STUCKCD);
         }
@@ -209,6 +220,9 @@ class Piece {
             });
         }
         this.checkStuck();
+        if (fall) {
+            return true;
+        }
     }
 
     spin() {
@@ -334,7 +348,9 @@ class Piece {
 
     down() {
         keysLoop[3] = true;
-        this.move(1,0);
+        if (this.move(1,0)  ) {
+            score ++;
+        }
 
         setTimeout(() => {
             keysLoop[3] = false;
@@ -342,6 +358,7 @@ class Piece {
     }
 
     bottom() {
+        var moves = 0;
         while (!this.stuck) {
             this.move(1, 0);
             this.blocks.forEach(block => {
@@ -362,8 +379,20 @@ class Piece {
             });
             this.render();
             render();
+            moves++;
         }
+        score += 3 * moves;
     }
+}
+
+function setup() {
+    tick = 0;
+    grid = createArray();
+    temp;
+    pieces = [];
+    keys = [false, false, false, false];
+    keysLoop = [false, false, false, false];
+    score = 0;
 }
 
 function createArray() {
@@ -468,6 +497,7 @@ function clearLine() {
             pieces.forEach(piece => {
                 piece.render();
             });
+            score += 75;
         }
     }
 }
@@ -498,6 +528,7 @@ function frame() {
     }
 
     // render and continue
+    scoreH1.innerHTML = score;
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
     render(); // draw new grid
     window.requestAnimationFrame(frame); // for next tick
@@ -530,5 +561,3 @@ document.addEventListener("keyup", function(event) {
         }
     }
 });
-
-
