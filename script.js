@@ -519,9 +519,13 @@ function controls() {
 function frame() {
     // algorithm stuff
     controls();
-    pieces.forEach(piece => {
+    for (var i = 0; i < pieces.length; i++) {
+        var piece = pieces[i];
+        if (piece.blocks.length == 0) {
+            pieces.splice(i, 1);
+        }
         piece.render();
-    });
+    }
 
     if (pieces[pieces.length-1].stuck) {
         pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
