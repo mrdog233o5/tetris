@@ -69,7 +69,7 @@ const BLOCKTYPES = [
     }
 ];
 const FALLSPEED = 350;
-const KEYSPEED = 60;
+const KEYSPEED = 80;
 const STUCKCD = 300;
 const AFTERSTUCKCD = 1000
 var tick = 0;
@@ -184,7 +184,6 @@ class Piece {
     }
 
     move(yMove, xMove) {
-        this.checkStuck();
         if (this.stuck) {
             return;
         }
@@ -227,13 +226,13 @@ class Piece {
                 i++;
             });
         }
+        this.checkStuck();
         if (fall) {
             return true;
         }
     }
 
     spin() {
-        this.checkStuck();
         // exit if not rotatable
         if (this.stuck || !this.rotatable) {
             return;
@@ -325,6 +324,7 @@ class Piece {
         this.anchor = anchor;
         this.blocks = coords;
         this.outlook = newblocks;
+        this.checkStuck();
     }
 
     left() {
@@ -577,19 +577,20 @@ gravity();
 // block movement
 // left up right down
 document.addEventListener("keydown", function(event) {
-    if (pieces[pieces.length - 1].stuckDetected) {
-        pieces[pieces.length - 1].keyDuringStuck = true;
-    }
-    for (var i = 0; i < keys.length; i++) {;
-        if (event.keyCode === 37 + i) {
-            keys[i] = true;
-        }
-    }
-    if (event.keyCode === 38) {
-        pieces[pieces.length - 1].spin();
-    }
     if (event.keyCode === 32) {
         pieces[pieces.length - 1].bottom();
+    } else {
+        if (pieces[pieces.length - 1].stuckDetected) {
+            pieces[pieces.length - 1].keyDuringStuck = true;
+        }
+        for (var i = 0; i < keys.length; i++) {;
+            if (event.keyCode === 37 + i) {
+                keys[i] = true;
+            }
+        }
+        if (event.keyCode === 38) {
+            pieces[pieces.length - 1].spin();
+        }
     }
 });
 document.addEventListener("keyup", function(event) {
