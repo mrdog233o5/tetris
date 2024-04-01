@@ -184,6 +184,7 @@ class Piece {
     }
 
     move(yMove, xMove) {
+        this.checkStuck();
         if (this.stuck) {
             return;
         }
@@ -226,16 +227,13 @@ class Piece {
                 i++;
             });
         }
-        this.checkStuck();
         if (fall) {
             return true;
         }
     }
 
     spin() {
-        if (this.stuck) {
-            return;
-        }
+        this.checkStuck();
         // exit if not rotatable
         if (this.stuck || !this.rotatable) {
             return;
@@ -330,9 +328,6 @@ class Piece {
     }
 
     left() {
-        if (this.stuckDetected) {
-            this.keyDuringStuck = true;
-        }
         keysLoop[0] = true;
         this.move(0,-1);
 
@@ -342,9 +337,6 @@ class Piece {
     }
 
     right() {
-        if (this.stuckDetected) {
-            this.keyDuringStuck = true;
-        }
         keysLoop[2] = true;
         this.move(0,1);
 
@@ -585,6 +577,9 @@ gravity();
 // block movement
 // left up right down
 document.addEventListener("keydown", function(event) {
+    if (pieces[pieces.length - 1].stuckDetected) {
+        pieces[pieces.length - 1].keyDuringStuck = true;
+    }
     for (var i = 0; i < keys.length; i++) {;
         if (event.keyCode === 37 + i) {
             keys[i] = true;
