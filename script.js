@@ -164,31 +164,27 @@ class Piece {
                             }
                         });
                         if (nowStuck) {
-                            readyToSpawn = false;
                             this.stuck = stuck;
                             clearLine();
                             if (!this.addedScore) {
                                 score += 10;
                                 this.addedScore = true;
                             }
-                            readyToSpawn = true;
                         }
                     }, AFTERSTUCKCD);
                 } else {
-                    readyToSpawn = false;
                     this.stuck = stuck;
                     clearLine();
                     if (!this.addedScore) {
                         score += 10;
                         this.addedScore = true;
                     }
-                    readyToSpawn = true;
                 }
             }, STUCKCD);
         }
     }
 
-    move(yMove, xMove) {
+    move(yMove, xMove, autoCheckStuck = true) {
         if (this.stuck) {
             return;
         }
@@ -231,7 +227,9 @@ class Piece {
                 i++;
             });
         }
-        this.checkStuck();
+        if (autoCheckStuck) {
+            this.checkStuck();
+        }
         if (fall) {
             return true;
         }
@@ -364,7 +362,7 @@ class Piece {
     bottom() {
         var moves = 0;
         while (!this.stuck) {
-            this.move(1, 0);
+            this.move(1, 0, false);
             this.blocks.forEach(block => {
             var y = block[0], x = block[1];
             if (
@@ -386,6 +384,7 @@ class Piece {
             moves++;
         }
         score += 3 * moves;
+        clearLine();
     }
 }
 
@@ -447,6 +446,7 @@ function gravity() {
 }
 
 function clearLine() {
+    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
     var line;
     var lineCleared;
     var lineFilled;
@@ -504,7 +504,6 @@ function clearLine() {
             score += 75;
         }
     }
-    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
 }
 
 function controls() {
@@ -526,6 +525,7 @@ function saveData() {
         localStorage["highscore"] = score;
     }
     localStorage["pieces"] = JSON.stringify(pieces);
+    localStorage["score"] = score;
 }
 
 function readData() {
@@ -535,6 +535,7 @@ function readData() {
         pieces.push(new Piece(piece.type));
         pieces[pieces.length - 1].applyData(piece);
     });
+    score = localStorage["score"];
 }
 
 function frame() {
