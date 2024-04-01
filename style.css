@@ -19,3 +19,17 @@ body {
     flex-direction: column;
     color: #FFFFFF;
 }
+
+#restart {
+    cursor: pointer;
+    color: #FFFFFF;
+    background: none;
+    border: #FFFFFF solid;
+    padding: 5px 15px;
+    border-radius: 5px 10px;
+    transition: background 0.5s;
+}
+
+#restart:hover {
+    background: #636363;
+}

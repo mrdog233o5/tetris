@@ -1,6 +1,8 @@
 const c = document.getElementById("game");
 const ctx = c.getContext("2d");
-const scoreH1 = document.getElementById("score");
+const scoreElement = document.getElementById("score");
+const highscoreElement = document.getElementById("highscore");
+const restartBtn = document.getElementById("restart");
 const SIZE = 25;
 const BLOCKTYPES = [
     {
@@ -80,6 +82,7 @@ var score = 0;
 
 class Piece {
     constructor(type) {
+        this.type = type;
         this.color = BLOCKTYPES[type]["color"];
         this.outlook = BLOCKTYPES[type]["outlook"];
         this.anchor = BLOCKTYPES[type]["anchor"];
@@ -97,6 +100,10 @@ class Piece {
                 }
             }
         }
+    }
+    
+    applyData(json) {
+        Object.assign(this, json);
     }
 
     render() {
@@ -516,7 +523,24 @@ function controls() {
 
 }
 
+function saveData() {
+    if (score > localStorage["highscore"] || localStorage["highscore"] == undefined) {
+        localStorage["highscore"] = score;
+    }
+    localStorage["pieces"] = JSON.stringify(pieces);
+}
+
+function readData() {
+    highscoreElement.innerHTML = "high score: " + localStorage["highscore"]
+    var localPieces = JSON.parse(localStorage["pieces"]);
+    localPieces.forEach((piece) => {
+        pieces.push(new Piece(piece.type));
+        pieces[pieces.length - 1].applyData(piece);
+    });
+}
+
 function frame() {
+
     // algorithm stuff
     controls();
     for (var i = 0; i < pieces.length; i++) {
@@ -532,14 +556,29 @@ function frame() {
     }
 
     // render and continue
-    scoreH1.innerHTML = score;
+    scoreElement.innerHTML = score;
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
     render(); // draw new grid
-    window.requestAnimationFrame(frame); // for next tick
     tick++;
+    saveData();
+    window.requestAnimationFrame(frame); // for next tick
 }
 
-pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+function restart() {
+    tick = 0;
+    grid = createArray();
+    temp;
+    pieces = [];
+    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+    keys = [false, false, false, false];
+    keysLoop = [false, false, false, false];
+    score = 0;
+}
+
+readData();
+if (pieces.length == 0) {
+    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+}
 frame();
 gravity();
 
@@ -564,4 +603,7 @@ document.addEventListener("keyup", function(event) {
             keys[i] = false;
         }
     }
+});
+restartBtn.addEventListener("click", function(event) {
+    restart();
 });
