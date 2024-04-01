@@ -72,6 +72,7 @@ const FALLSPEED = 350;
 const KEYSPEED = 80;
 const STUCKCD = 300;
 const AFTERSTUCKCD = 1000
+var readyToSpawn = true;
 var tick = 0;
 var grid = createArray();
 var temp;
@@ -163,21 +164,25 @@ class Piece {
                             }
                         });
                         if (nowStuck) {
+                            readyToSpawn = false;
                             this.stuck = stuck;
                             clearLine();
                             if (!this.addedScore) {
                                 score += 10;
                                 this.addedScore = true;
                             }
+                            readyToSpawn = true;
                         }
                     }, AFTERSTUCKCD);
                 } else {
+                    readyToSpawn = false;
                     this.stuck = stuck;
                     clearLine();
                     if (!this.addedScore) {
                         score += 10;
                         this.addedScore = true;
                     }
+                    readyToSpawn = true;
                 }
             }, STUCKCD);
         }
@@ -499,6 +504,7 @@ function clearLine() {
             score += 75;
         }
     }
+    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
 }
 
 function controls() {
@@ -541,10 +547,6 @@ function frame() {
             pieces.splice(i, 1);
         }
         piece.render();
-    }
-
-    if (pieces[pieces.length-1].stuck) {
-        pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
     }
 
     // render and continue
