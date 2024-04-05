@@ -529,6 +529,9 @@ function saveData() {
 }
 
 function readData() {
+    if (localStorage["highscore"] == undefined) localStorage["highscore"] = 0;
+    if (localStorage["pieces"] == undefined) localStorage["pieces"] = "[]";
+    if (localStorage["score"] == undefined) localStorage["score"] = 0;
     highscoreElement.innerHTML = "high score: " + localStorage["highscore"]
     var localPieces = JSON.parse(localStorage["pieces"]);
     localPieces.forEach((piece) => {
