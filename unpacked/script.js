@@ -73,13 +73,14 @@ const KEYSPEED = 80;
 const STUCKCD = 300;
 const AFTERSTUCKCD = 1000
 var readyToSpawn = true;
-var tick = 0;
 var grid = createArray();
 var temp;
 var pieces = [];
 var keys = [false, false, false, false];
 var keysLoop = [false, false, false, false];
 var score = 0;
+var die = false;
+var pause = false;
 
 class Piece {
     constructor(type) {
@@ -388,16 +389,6 @@ class Piece {
     }
 }
 
-function setup() {
-    tick = 0;
-    grid = createArray();
-    temp;
-    pieces = [];
-    keys = [false, false, false, false];
-    keysLoop = [false, false, false, false];
-    score = 0;
-}
-
 function createArray() {
     // Create a 20x10 2D array
     const rows = 20;
@@ -446,7 +437,11 @@ function gravity() {
 }
 
 function clearLine() {
-    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+    if (pieces.length > 0 && pieces[pieces.length - 1].stuck) {
+        pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+    } else {
+        return;
+    }
     var line;
     var lineCleared;
     var lineFilled;
@@ -541,7 +536,35 @@ function readData() {
     score = localStorage["score"];
 }
 
+function checkDeath() {
+    for (var i = 0; i < grid.length; i++) {
+        grid[i].forEach((block) => {
+            if (!block.fall) {
+                die = true;
+            }
+        })
+    }
+}
+
+function restart() {
+    grid = createArray();
+    temp = null;
+    pieces = [];
+    keys = [false, false, false, false];
+    keysLoop = [false, false, false, false];
+    score = 0;
+    saveData();
+}
+
 function frame() {
+    if (pause) {
+        window.requestAnimationFrame(frame); // for next tick
+        return;
+    }
+
+    if (pieces.length == 0) {
+        pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
+    }
 
     // algorithm stuff
     controls();
@@ -557,26 +580,13 @@ function frame() {
     scoreElement.innerHTML = score;
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
     render(); // draw new grid
-    tick++;
+    checkDeath();
     saveData();
     window.requestAnimationFrame(frame); // for next tick
 }
 
-function restart() {
-    tick = 0;
-    grid = createArray();
-    temp;
-    pieces = [];
-    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
-    keys = [false, false, false, false];
-    keysLoop = [false, false, false, false];
-    score = 0;
-}
-
 readData();
-if (pieces.length == 0) {
-    pieces.push(new Piece(Math.floor(Math.random() * BLOCKTYPES.length)));
-}
+
 frame();
 gravity();
 
