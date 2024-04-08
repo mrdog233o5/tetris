@@ -23,7 +23,7 @@ body {
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-#dead .title {
+#dead #msg {
     font-size: 40px;
 }
 

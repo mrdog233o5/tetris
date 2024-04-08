@@ -68,6 +68,11 @@ const BLOCKTYPES = [
         "rotatable": true
     }
 ];
+const DEATHMSG = `EZ
+SKILL ISSUE
+TOO BAD
+GET BETTER
+UR DEAD`.split("\n");
 const FALLSPEED = 350;
 const KEYSPEED = 80;
 const STUCKCD = 300;
@@ -585,15 +590,18 @@ function frame() {
     if (dead) {
         document.getElementById("alive").style.display = 'none';
         document.getElementById("dead").style.display = '';
+        document.getElementById("msg").innerText = DEATHMSG[Math.floor(Math.random() * DEATHMSG.length)];
         pause = true;
     } else {
         document.getElementById("dead").style.display = 'none';
         document.getElementById("alive").style.display = '';
     }
-    // set score
+    // display score
     scoreElements.forEach((element) => {
         element.innerHTML = score;
     });
+    // display highscore
+    highscoreElement.innerHTML = localStorage["highscore"];
 
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
     render(); // draw new grid
