@@ -1,6 +1,6 @@
 const c = document.getElementById("game");
 const ctx = c.getContext("2d");
-const scoreElement = document.getElementById("score");
+const scoreElements = Array.from(document.getElementsByClassName("score"));
 const highscoreElement = document.getElementById("highscore");
 const restartBtn = document.getElementById("restart");
 const SIZE = 25;
@@ -71,7 +71,8 @@ const BLOCKTYPES = [
 const FALLSPEED = 350;
 const KEYSPEED = 80;
 const STUCKCD = 300;
-const AFTERSTUCKCD = 1000
+const AFTERSTUCKCD = 1000;
+const DEATHROW = 1
 var readyToSpawn = true;
 var grid = createArray();
 var temp;
@@ -79,7 +80,7 @@ var pieces = [];
 var keys = [false, false, false, false];
 var keysLoop = [false, false, false, false];
 var score = 0;
-var die = false;
+var dead = false;
 var pause = false;
 
 class Piece {
@@ -540,14 +541,17 @@ function checkDeath() {
     for (var i = 0; i < grid.length; i++) {
         grid[i].forEach((block) => {
             if (!block.fall) {
-                die = true;
+                dead = true;
             }
         })
+        if (i > DEATHROW) break;
     }
 }
 
 function restart() {
     grid = createArray();
+    dead = false;
+    pause = false;
     temp = null;
     pieces = [];
     keys = [false, false, false, false];
@@ -577,7 +581,20 @@ function frame() {
     }
 
     // render and continue
-    scoreElement.innerHTML = score;
+    // check alive or dead
+    if (dead) {
+        document.getElementById("alive").style.display = 'none';
+        document.getElementById("dead").style.display = '';
+        pause = true;
+    } else {
+        document.getElementById("dead").style.display = 'none';
+        document.getElementById("alive").style.display = '';
+    }
+    // set score
+    scoreElements.forEach((element) => {
+        element.innerHTML = score;
+    });
+
     ctx.clearRect(0, 0, c.width, c.height); // clear screen
     render(); // draw new grid
     checkDeath();
@@ -593,6 +610,7 @@ gravity();
 // block movement
 // left up right down
 document.addEventListener("keydown", function(event) {
+    if (pause) return;
     if (event.keyCode === 32) {
         pieces[pieces.length - 1].bottom();
     } else {
