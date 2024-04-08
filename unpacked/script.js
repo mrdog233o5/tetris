@@ -534,7 +534,7 @@ function readData() {
         pieces.push(new Piece(piece.type));
         pieces[pieces.length - 1].applyData(piece);
     });
-    score = localStorage["score"];
+    score = parseInt(localStorage["score"]);
 }
 
 function checkDeath() {
