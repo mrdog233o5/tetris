@@ -3,6 +3,7 @@ const ctx = c.getContext("2d");
 const scoreElements = Array.from(document.getElementsByClassName("score"));
 const highscoreElement = document.getElementById("highscore");
 const restartBtn = document.getElementById("restart");
+const pauseBtn = document.getElementById("pause");
 const SIZE = 25;
 const BLOCKTYPES = [
     {
@@ -87,6 +88,7 @@ var keysLoop = [false, false, false, false];
 var score = 0;
 var dead = false;
 var pause = false;
+var displayPause = false;
 
 class Piece {
     constructor(type) {
@@ -557,6 +559,7 @@ function restart() {
     grid = createArray();
     dead = false;
     pause = false;
+    displayPause = false;
     temp = null;
     pieces = [];
     keys = [false, false, false, false];
@@ -566,7 +569,14 @@ function restart() {
 }
 
 function frame() {
+    document.getElementById("dead").style.display = 'none';
+    document.getElementById("alive").style.display = '';
     if (pause) {
+        if (displayPause) {
+            document.getElementById("dead").style.display = '';
+            document.getElementById("alive").style.display = 'none';
+            if (!dead) document.getElementById("msg").innerText = "PAUSED";
+        }
         window.requestAnimationFrame(frame); // for next tick
         return;
     }
@@ -588,13 +598,9 @@ function frame() {
     // render and continue
     // check alive or dead
     if (dead) {
-        document.getElementById("alive").style.display = 'none';
-        document.getElementById("dead").style.display = '';
         document.getElementById("msg").innerText = DEATHMSG[Math.floor(Math.random() * DEATHMSG.length)];
         pause = true;
-    } else {
-        document.getElementById("dead").style.display = 'none';
-        document.getElementById("alive").style.display = '';
+        displayPause = true;
     }
     // display score
     scoreElements.forEach((element) => {
@@ -611,7 +617,8 @@ function frame() {
 }
 
 readData();
-
+document.getElementById("dead").style.display = 'none';
+document.getElementById("alive").style.display = '';
 frame();
 gravity();
 
@@ -644,4 +651,8 @@ document.addEventListener("keyup", function(event) {
 });
 restartBtn.addEventListener("click", function(event) {
     restart();
+});
+pauseBtn.addEventListener("click", function(event) {
+    pause = !pause;
+    displayPause = !displayPause;
 });

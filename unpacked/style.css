@@ -45,15 +45,25 @@ body {
     height: 100%;
 }
 
-#restart {
+.btn {
     cursor: pointer;
     background: none;
     border: #FFFFFF solid;
     padding: 5px 15px;
     border-radius: 5px 10px;
     transition: background 0.5s;
+    width: 50px;
 }
 
-#restart:hover {
+.btn:hover {
     background: #636363;
+}
+
+#btnContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0px;
+    width: 100vw;
+    gap: 20px;
 }
