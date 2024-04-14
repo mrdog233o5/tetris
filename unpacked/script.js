@@ -653,6 +653,7 @@ restartBtn.addEventListener("click", function(event) {
     restart();
 });
 pauseBtn.addEventListener("click", function(event) {
+    if (dead) return;
     pause = !pause;
     displayPause = !displayPause;
 });
