@@ -4,6 +4,10 @@
     color: #FFFFFF;
 }
 
+a {
+    text-decoration: none;
+}
+
 body {
     background: #161A1D;
 }
@@ -49,10 +53,12 @@ body {
     cursor: pointer;
     background: none;
     border: #FFFFFF solid;
-    padding: 5px 15px;
+    padding: 5px 0px;
     border-radius: 5px 10px;
     transition: background 0.5s;
-    width: 50px;
+    width: 60px;
+    overflow: hidden;
+    text-align: center;
 }
 
 .btn:hover {
@@ -65,5 +71,5 @@ body {
     justify-content: center;
     margin: 5px 0px;
     width: 100vw;
-    gap: 20px;
+    gap: 10px;
 }
