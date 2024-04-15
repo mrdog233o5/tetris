@@ -73,3 +73,7 @@ body {
     width: 100vw;
     gap: 10px;
 }
+
+p {
+    font-size: 11px;
+}
