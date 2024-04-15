@@ -71,14 +71,19 @@ const BLOCKTYPES = [
 ];
 const DEATHMSG = `EZ
 SKILL ISSUE
-TOO BAD
 GET BETTER
-UR DEAD`.split("\n");
+TRASH
+NOOB`.split("\n");
 const FALLSPEED = 350;
 const KEYSPEED = 80;
 const STUCKCD = 300;
 const AFTERSTUCKCD = 1000;
 const DEATHROW = 1
+const settingsDefault = {
+    "grid": true,
+    "offensive death message": true
+};
+var settings = settingsDefault;
 var readyToSpawn = true;
 var grid = createArray();
 var temp;
@@ -431,6 +436,21 @@ function render() {
         x = 0;
         y++;
     });
+    if (settings["grid"]) {
+        ctx.strokeStyle = "#FFFFFF50";
+        for (var i = 0; i < grid[0].length; i++) {
+            ctx.beginPath(); // Start a new path
+            ctx.moveTo(i * SIZE, 0); // Move the pen to (30, 50)
+            ctx.lineTo(i * SIZE, grid.length * SIZE); // Draw a line to (150, 100)
+            ctx.stroke(); // Render the path
+        }
+        for (var i = 0; i < grid.length; i++) {
+            ctx.beginPath(); // Start a new path
+            ctx.moveTo(0, i * SIZE); // Move the pen to (30, 50)
+            ctx.lineTo(grid[0].length * SIZE, i * SIZE); // Draw a line to (150, 100)
+            ctx.stroke(); // Render the path
+        }
+    }
 }
 
 function gravity() {
@@ -529,12 +549,17 @@ function saveData() {
     }
     localStorage["pieces"] = JSON.stringify(pieces);
     localStorage["score"] = score;
+    if (Object.keys(JSON.parse(localStorage["settings"])) != Object.keys(settingsDefault)) {
+        console.log("a");
+        localStorage["settings"] = JSON.stringify(settingsDefault);
+    }
 }
 
 function readData() {
     if (localStorage["highscore"] == undefined) localStorage["highscore"] = 0;
     if (localStorage["pieces"] == undefined) localStorage["pieces"] = "[]";
     if (localStorage["score"] == undefined) localStorage["score"] = 0;
+    if (localStorage["settings"] == undefined) localStorage["settings"] = JSON.stringify(settings);
     highscoreElement.innerHTML = "high score: " + localStorage["highscore"]
     var localPieces = JSON.parse(localStorage["pieces"]);
     localPieces.forEach((piece) => {
@@ -542,6 +567,7 @@ function readData() {
         pieces[pieces.length - 1].applyData(piece);
     });
     score = parseInt(localStorage["score"]);
+    settings = JSON.parse(localStorage["settings"]);
 }
 
 function checkDeath() {
@@ -649,11 +675,11 @@ document.addEventListener("keyup", function(event) {
         }
     }
 });
-restartBtn.addEventListener("click", function(event) {
+restartBtn.onclick = event => {
     restart();
-});
-pauseBtn.addEventListener("click", function(event) {
+};
+pauseBtn.onclick = event => {
     if (dead) return;
     pause = !pause;
     displayPause = !displayPause;
-});
+};

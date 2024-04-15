@@ -1,0 +1,18 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: #161A1D;
+	color: #FFFFFF;
+}
+
+h1 {
+	margin: 20px;
+}
+
+.option {
+	display: flex;
+	align-items: center;
+}
