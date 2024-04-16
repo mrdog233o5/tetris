@@ -549,10 +549,15 @@ function saveData() {
     }
     localStorage["pieces"] = JSON.stringify(pieces);
     localStorage["score"] = score;
-    if (Object.keys(JSON.parse(localStorage["settings"])) != Object.keys(settingsDefault)) {
-        console.log("a");
-        localStorage["settings"] = JSON.stringify(settingsDefault);
+    var resetSettings = false;
+
+    for (var i = 0; i < Object.keys(JSON.parse(localStorage["settings"])).length; i++) {
+        if (Object.keys(JSON.parse(localStorage["settings"]))[i] == Object.keys(settingsDefault)[i]) resetSettings = true;
     }
+
+    if (Object.keys(JSON.parse(localStorage["settings"])).length != Object.keys(settingsDefault).length) resetSettings = true;
+
+    if (resetSettings) localStorage["settings"] = JSON.stringify(settingsDefault);
 }
 
 function readData() {
@@ -650,7 +655,7 @@ gravity();
 
 // block movement
 // left up right down
-document.addEventListener("keydown", function(event) {
+document.onkeydown = event => {
     if (pause) return;
     if (event.keyCode === 32) {
         pieces[pieces.length - 1].bottom();
@@ -667,14 +672,14 @@ document.addEventListener("keydown", function(event) {
             pieces[pieces.length - 1].spin();
         }
     }
-});
-document.addEventListener("keyup", function(event) {
+};
+document.onkeyup = event => {
     for (var i = 0; i < keys.length; i++) {;
         if (event.keyCode === 37 + i) {
             keys[i] = false;
         }
     }
-});
+};
 restartBtn.onclick = event => {
     restart();
 };
