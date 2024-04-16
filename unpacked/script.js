@@ -81,7 +81,8 @@ const AFTERSTUCKCD = 1000;
 const DEATHROW = 1
 const settingsDefault = {
     "grid": true,
-    "offensive death message": true
+    "offensive death message": true,
+    "keep progrress when closed": true,
 };
 var settings = settingsDefault;
 var readyToSpawn = true;
@@ -566,13 +567,15 @@ function readData() {
     if (localStorage["score"] == undefined) localStorage["score"] = 0;
     if (localStorage["settings"] == undefined) localStorage["settings"] = JSON.stringify(settings);
     highscoreElement.innerHTML = "high score: " + localStorage["highscore"]
-    var localPieces = JSON.parse(localStorage["pieces"]);
-    localPieces.forEach((piece) => {
-        pieces.push(new Piece(piece.type));
-        pieces[pieces.length - 1].applyData(piece);
-    });
-    score = parseInt(localStorage["score"]);
     settings = JSON.parse(localStorage["settings"]);
+    if (settings["keep progrress when closed"]) {
+        var localPieces = JSON.parse(localStorage["pieces"]);
+        localPieces.forEach((piece) => {
+            pieces.push(new Piece(piece.type));
+            pieces[pieces.length - 1].applyData(piece);
+        });
+        score = parseInt(localStorage["score"]);
+    }
 }
 
 function checkDeath() {
