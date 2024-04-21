@@ -10,10 +10,13 @@ body {
 
 h1 {
 	margin: 20px;
-	text-align: center;
 }
 
 .option {
 	display: flex;
 	align-items: center;
+}
+
+.center {
+	text-align: center;
 }
