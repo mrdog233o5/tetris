@@ -1,1 +1,1 @@
-This program does not collect any privacy.
+This program does not handles personal or sensitive user data.
