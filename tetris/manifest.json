@@ -7,9 +7,6 @@
         "default_popup": "index.html",
         "default_title": "tetris"
     },
-    "permissions": [
-        "storage"
-    ],
     "icons": {
         "128": "./icon/icon128.png"
     }
