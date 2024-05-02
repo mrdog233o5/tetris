@@ -552,10 +552,6 @@ function saveData() {
     localStorage["score"] = score;
     var resetSettings = false;
 
-    for (var i = 0; i < Object.keys(JSON.parse(localStorage["settings"])).length; i++) {
-        if (Object.keys(JSON.parse(localStorage["settings"]))[i] == Object.keys(settingsDefault)[i]) resetSettings = true;
-    }
-
     if (Object.keys(JSON.parse(localStorage["settings"])).length != Object.keys(settingsDefault).length) resetSettings = true;
 
     if (resetSettings) localStorage["settings"] = JSON.stringify(settingsDefault);
